@@ -9,39 +9,39 @@ public:
     }
 };
 
-class BadKey : public std::exception{
+class BadKey{
 public:
-    const char* what() const noexcept override{
+    const char* what(){
         return "Bad Key: Key is not valid";
     }
 };
 
-class KeyDoesntExists : public std::exception{
+class KeyDoesntExists{
 public:
-    const char* what() const noexcept override{
+    const char* what(){
         return "Key Doesn't Exists: No such key in the tree";
     }
 };
 
-class CantFitInArray : public std::exception{
+class IdDoesntExists{
 public:
-    const char* what() const noexcept override{
+    const char* what(){
+        return "Id Doesn't Exists: No such Id in the tree";
+    }
+};
+
+class CantFitInArray{
+public:
+    const char* what(){
         return "Can't Fit In Array: the allocated array is too small for the tree";
     }
 };
 
-class EmptyTree : public std::exception{
+class EmptyTree{
 public:
-    const char* what() const noexcept override{
+    const char* what(){
         return "Empty Tree: the tree is empty";
     }
 };
 
-class InvalidArguments : public std::exception{
-public:
-    const char* what() const noexcept override{
-        return "Invalid Arguments: invalid arguments for player or a team";
-    }
-};
-
-#endif //EXCEPTION_H
+#endif

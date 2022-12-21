@@ -1,5 +1,5 @@
-#ifndef TEAM_H
-#define TEAM_H
+#ifndef PLAYER_H
+#define PLAYER_H
 
 #include "wet2util.h"
 
@@ -8,24 +8,24 @@ public:
     /*
     Player C'tor
     */
-    Player(int playerId, int teamId, const permutation_t& spirit, int gamesPlayed,
-            int ability, int cards,  bool goalKeeper);
+    Player(int playerId, int teamId, const permutation_t& spirit, int gamesPlayed =0,
+            int ability=0, int cards=0,  bool goalKeeper=false);
 
-    int getPlayerId() const;
+    int get_player_id() const;
 
-    int getTeamId() const;
+    int get_team_id() const;
 
-    int getGamesPlayed() const;
+    int get_games_played() const;
 
-    int getCards() const;
+    int get_cards() const;
 
-    bool isGoalkeeper() const;
+    bool is_goalkeeper() const;
 
-    const permutation_t& getSpirit() const;
+    const permutation_t& get_spirit() const;
 
-    void addCards(int cards);
+    void add_cards(int cards);
 
-    void addGames(int games);
+    void add_games(int games);
     
 private:
     int m_playerId;
@@ -37,4 +37,4 @@ private:
     permutation_t m_spirit;
 };
 
-#endif TEAM_H
+#endif //PLAYER_H
