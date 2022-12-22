@@ -19,6 +19,8 @@ public:
 
     int get_cards() const;
 
+    int get_ability() const;
+
     bool is_goalkeeper() const;
 
     const permutation_t& get_spirit() const;

@@ -20,6 +20,10 @@ int Player::get_games_played() const{
     return m_gamesPlayed;
 }
 
+int Player::get_ability() const{
+    return m_ability;
+}
+
 const permutation_t& Player::get_spirit() const{
     return m_spirit;
 }

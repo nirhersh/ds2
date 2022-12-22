@@ -1,6 +1,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
+#include <stdexcept>
 
 class KeyAlreadyExists : public std::exception{
 public:
@@ -9,39 +10,46 @@ public:
     }
 };
 
-class BadKey{
+class BadKey : public std::exception{
 public:
-    const char* what(){
+    const char* what() const noexcept override{
         return "Bad Key: Key is not valid";
     }
 };
 
-class KeyDoesntExists{
+class KeyDoesntExists : public std::exception{
 public:
-    const char* what(){
+    const char* what() const noexcept override{
         return "Key Doesn't Exists: No such key in the tree";
     }
 };
 
-class IdDoesntExists{
+class CantFitInArray : public std::exception{
 public:
-    const char* what(){
-        return "Id Doesn't Exists: No such Id in the tree";
-    }
-};
-
-class CantFitInArray{
-public:
-    const char* what(){
+    const char* what() const noexcept override{
         return "Can't Fit In Array: the allocated array is too small for the tree";
     }
 };
 
-class EmptyTree{
+class EmptyTree : public std::exception{
 public:
-    const char* what(){
+    const char* what() const noexcept override{
         return "Empty Tree: the tree is empty";
     }
 };
 
-#endif
+class InvalidArguments : public std::exception{
+public:
+    const char* what() const noexcept override{
+        return "Invalid Arguments: invalid arguments for player or a team";
+    }
+};
+
+class IdDoesntExists : public std::exception{
+public:
+    const char* what() const noexcept override{
+        return "Id Doesn't Exist: id doesn't exists in hash table";
+    }
+};
+
+#endif //EXCEPTION_H

@@ -32,7 +32,7 @@ void run_test(std::function<bool()> test, std::string test_name)
 bool hash_add_find_test(){
     UnionFind::HashTable hash1;
     int hashSize = 100;
-    UnionFind::Node** nodes = new UnionFind::Node*[100];
+    UnionFind::Node** nodes = new UnionFind::Node*[hashSize];
     for(int i=0; i<hashSize; i++){
         nodes[i] = new UnionFind::Node(new Player(i, i, permutation_t()), permutation_t(), nullptr, nullptr);
         hash1.add(i, nodes[i]);
@@ -58,7 +58,7 @@ bool hash_rehash_test(){
         nodes[i] = new UnionFind::Node(new Player(i, i, permutation_t()), permutation_t(), nullptr, nullptr);
         hash1.add(i, nodes[i]);
     }
-    if(!(hash1.get_array_size() != (pow(2, 10) - 1))){
+    if(hash1.get_array_size() != (pow(2, 10) - 1)){
         return false;
     }
 
