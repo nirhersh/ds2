@@ -16,12 +16,40 @@
 #define WORLDCUP23A2_H_
 
 #include "wet2util.h"
+#include "AVLRankTree.h"
+#include "UnionFind.h"
+#include "Player.h"
+#include "Team.h"
 
 class world_cup_t {
 private:
-	//
-	// Here you may add anything you want
-	//
+
+	struct TeamKey{
+	private:
+		int m_teamId;
+		int m_teamAbility;
+	public:
+		explicit TeamKey(int teamId, int teamAbility) : m_teamId(teamId), m_teamAbility(teamAbility){}
+
+		~TeamKey() = default;
+
+		friend bool operator>(const TeamKey& first, const TeamKey& second);
+
+    	friend bool operator<(const TeamKey& first, const TeamKey& second);
+	};
+	UnionFind* m_playersTeamsUF;
+	AVLRankTree<Team, int> m_UFTeams;
+	AVLRankTree<Team, TeamKey> m_rankedTeams;
+	static const int DISQUALIFIED_PLAYERS_TEAM_ID = -1;
+	static const int DRAW = 0;
+	static const int TEAM1_WON_WITH_ABILITY = 1;
+	static const int TEAM1_WON_WITH_TEAM_STRENGTH = 2;
+	static const int TEAM2_WON_WITH_ABILITY = 3;
+	static const int TEAM2_WON_WITH_TEAM_STRENGTH = 4;
+
+	friend bool operator>(const TeamKey& first, const TeamKey& second);
+
+	friend bool operator<(const TeamKey& first, const TeamKey& second);
 	
 public:
 	// <DO-NOT-MODIFY> {

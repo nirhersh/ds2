@@ -10,7 +10,7 @@ public:
 
     int get_id() const;
     int get_total_points() const;
-    int get_total_player_ability() const;
+    int get_team_ability() const;
     int get_games_played() const;
     int get_num_of_players() const;
     const permutation_t& get_spirit_strength() const;

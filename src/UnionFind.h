@@ -1,7 +1,6 @@
 #ifndef UNION_FIND_H
 #define UNION_FIND_H
 
-#include "Team.h"
 #include "Player.h"
 #include "wet2util.h"
 
@@ -9,7 +8,7 @@
 #include "assert.h"
 #include <iostream>
 #include "Exception.h"
-#include "AVLTree.h"
+#include "AVLRankTree.h"
 
 class Team;
 class UnionFind{
@@ -19,7 +18,7 @@ public:
     class Node{
     public:
         
-        Node(Player* player, const permutation_t& partialSpirit, Team* team, Node* parent, int gamesPlayed);
+        Node(Player* player, const permutation_t& partialSpirit, Team* team, Node* parent, int gamesPlayed = 0);
 
         Node(const Node& other) = delete;
 
@@ -79,9 +78,9 @@ public:
 
     //-------------- UnionFind class declaration --------------
 
-    UnionFind() = default;
+    UnionFind(AVLRankTree<Team, int>* teamsTree);
 
-    ~UnionFind();
+    ~UnionFind() = default;
 
     UnionFind(const UnionFind& other) = delete;
 
@@ -93,15 +92,15 @@ public:
 
     void add_player(Player* player, int teamId);
 
-    permutation_t& get_partial_spirit(Player* player);
+    permutation_t get_partial_spirit(Player* player);
 
     int get_games_played(Player* player);
     
 private:
-    HashTable m_players;
-    AVLTree<Team, int> m_teams;
+    HashTable* m_players;
+    AVLRankTree<Team, int>* m_teams;
 };
 
 
-
-#endif //UUNION_FIND_H
+#include "Team.h"
+#endif //UNION_FIND_H

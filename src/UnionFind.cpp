@@ -3,9 +3,14 @@
 
 /*.......................UNION FIND IMPLEMENTATION............................*/
 
+UnionFind::UnionFind(AVLRankTree<Team, int>* teamsTree){
+    m_players = new HashTable();
+    m_teams = teamsTree;
+}
+
 Team* UnionFind::find(int playerId) const
 {
-    Node* currentPlayer = m_players.find(playerId);
+    Node* currentPlayer = m_players->find(playerId);
     Node* tempToStart = currentPlayer;
     permutation_t permAccumulator = currentPlayer->m_partialSpirit * currentPlayer->m_partialSpirit.inv(); // this is the identity element
     int gamesCounter = 0;
@@ -44,11 +49,10 @@ void UnionFind::union_teams(Team* mainTeam, Team* secondTeam)
         mainTeam->set_team_root(root2);
     }
     mainTeam->unite_team(secondTeam);
-    m_teams.remove(secondTeam->get_id());
 }
 
 void UnionFind::add_player(Player* player, int teamId){
-    Team* team = m_teams.search(teamId);
+    Team* team = m_teams->search(teamId);
     if(team->get_team_root() == nullptr){
         Node* playerNode = new Node(player, player->get_spirit(), team, nullptr, 0);
         team->set_team_root(playerNode);
@@ -56,12 +60,13 @@ void UnionFind::add_player(Player* player, int teamId){
         Node* teamRoot = team->get_team_root();
         permutation_t partialSpirit = (teamRoot->m_partialSpirit.inv()) * teamRoot->m_team->get_spirit_strength();
         Node* playerNode = new Node(player, partialSpirit, team, teamRoot, -(teamRoot->m_gamesPlayed));
+        m_players->add(player->get_player_id(), playerNode);
     }
 }
 
-permutation_t& UnionFind::get_partial_spirit(Player* player){
+permutation_t UnionFind::get_partial_spirit(Player* player){
     find(player->get_player_id());
-    Node* current = m_players.find(player->get_player_id());
+    Node* current = m_players->find(player->get_player_id());
     permutation_t partialSpirit = current->m_partialSpirit * (current->m_partialSpirit.inv());
     while(current){
         partialSpirit = current->m_partialSpirit * partialSpirit;
@@ -72,7 +77,7 @@ permutation_t& UnionFind::get_partial_spirit(Player* player){
 int UnionFind::get_games_played(Player* player)
 {
     int gamesCounter = 0;
-    Node* current = m_players.find(player->get_player_id());
+    Node* current = m_players->find(player->get_player_id());
     find(player->get_player_id());
     while(current)
     {
@@ -110,6 +115,11 @@ UnionFind::HashTable::HashTable() : m_exponent(8), m_currentSize(0)
 }
 
 UnionFind::HashTable::~HashTable(){
+    for(int i=0; i<m_arraySize; i++){
+        if(m_nodesArray[i] != nullptr){
+            delete m_nodesArray[i]->m_player;
+        }
+    }
     delete[] m_nodesArray;
 }
 

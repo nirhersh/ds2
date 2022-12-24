@@ -16,7 +16,7 @@ int Team::get_total_points() const
     return m_totalPoints;
 }
 
-int Team::get_total_player_ability() const
+int Team::get_team_ability() const
 {
     return m_totalPlayersAbility;
 }
