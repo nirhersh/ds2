@@ -2,7 +2,7 @@
 
 Team::Team(int teamId) : m_teamId(teamId), m_totalPoints(0), m_totalPlayersAbility(0),
                          m_gamesPlayed(0), m_goalkeeper(false){
-    m_spiritStrength = permutation_t();
+    m_spiritStrength = permutation_t::neutral();
     m_teamRoot = nullptr;
 }
 

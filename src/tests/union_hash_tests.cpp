@@ -17,14 +17,16 @@ void run_test(std::function<bool()> test, std::string test_name);
 bool hash_rehash_test();
 bool hash_add_find_test();
 bool rankTree_test();
+bool union_find_find_test();
 
 
 
 int main()
 {
-    // run_test(hash_add_find_test, "add find test");
-    // run_test(hash_rehash_test, "rehash test");
+    run_test(hash_add_find_test, "add find test");
+    run_test(hash_rehash_test, "rehash test");
     run_test(rankTree_test, "rankTree test");
+    run_test(union_find_find_test, "Union Find find() test");
 }
 
 
@@ -54,10 +56,6 @@ bool hash_add_find_test(){
             return false;
         }
     }
-    for(int i=0; i<hashSize ;i++){
-        delete nodes[i]->get_player();
-        delete nodes[i];
-    }
     delete[] nodes;
     return true;
 }
@@ -79,10 +77,6 @@ bool hash_rehash_test(){
             return false;
         }
     }
-    for(int i=0; i<hashSize ;i++){
-        delete nodes[i]->get_player();
-        delete nodes[i];
-    }
     delete[] nodes;
     return true;
 }
@@ -90,7 +84,7 @@ bool hash_rehash_test(){
 
 bool rankTree_test()
 {
-    int testLength = 100000000;
+    int testLength = 100000;
     int* array = new int[testLength];
     for (int i = 0; i < testLength; i++)
     {
@@ -140,27 +134,91 @@ bool rankTree_test()
             assert(false);
         }
     }
-
-
-
-    
-    
+    delete[] array;
     return true;
     
 }
 
+bool union_find_find_test(){
+    AVLRankTree<Team, int> teams;
+    Team* team1 = new Team(1);
+    teams.push(team1, 1);
+    UnionFind* uf = new UnionFind(&teams);
+    int testLength = 10000;
+    int* array = new int[testLength];
+    for (int i = 0; i < testLength; i++)
+    {
+        array[i] = i;
+    }
+    std::random_shuffle(array, array + testLength - 1);
+    Player** players = new Player*[testLength];
+    for(int i=0; i<testLength; i++){
+        players[i] = new Player(i, 1, permutation_t::neutral());
+    }
+    for(int i=0; i<testLength; i++){
+        uf->add_player(players[i], 1);
+    }
+    for(int i=0; i<testLength; i++){
+        try{
+            if(uf->find(i)->get_id() != 1){
+                delete [] players;
+                delete [] array;
+                delete team1;
+                return false;
+            }
+        }catch(IdDoesntExists& e){
+            std::cout << e.what() << std::endl;
+            delete [] players;
+            delete [] array;
+            delete team1;
+            return false;
+        }
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    Team* team2 = new Team(2);
+    Team* team3 = new Team(3);
+    teams.push(team2, 2);
+    teams.push(team3, 3);
+    Player* player2 = new Player(testLength+1, 2, permutation_t::neutral());
+    Player* player3 = new Player(testLength+2, 3, permutation_t::neutral());
+    uf->add_player(player2, 2);
+    uf->add_player(player3, 3);
+    for(int i=10001; i<10003; i++){
+        try{
+            if(uf->find(i)->get_id() != i-testLength +1){
+                delete [] players;
+                delete [] array;
+                delete team1;
+                delete team2;
+                delete team3;
+                return false;
+            }
+        }catch(IdDoesntExists& e){
+            delete [] players;
+            delete [] array;
+            delete team1;
+            delete team2;
+            delete team3;
+            std::cout << e.what() << std::endl;
+            return false;
+        }
+    }
+    try{
+        uf->find(testLength + 5);
+    }catch(IdDoesntExists& e){
+        delete [] players;
+        delete [] array;
+        delete team1;
+        delete team2;
+        delete team3;
+        delete uf;
+        return true;
+    }   
+    delete [] players;
+    delete [] array;
+    delete team1;
+    delete team2;
+    delete team3;
+    return false;
+}
 

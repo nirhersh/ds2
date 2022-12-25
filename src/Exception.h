@@ -2,6 +2,7 @@
 #define EXCEPTION_H
 
 #include <stdexcept>
+#include <string>
 
 class KeyAlreadyExists : public std::exception{
 public:
@@ -47,9 +48,15 @@ public:
 
 class IdDoesntExists : public std::exception{
 public:
-    const char* what() const noexcept override{
-        return "Id Doesn't Exist: id doesn't exists in hash table";
+    IdDoesntExists(int id) : m_id(id), message("Id Doesn't Exist: "){
+        message += std::to_string(m_id);
     }
+    const char* what() const noexcept override{
+        return message.c_str();
+    }
+private:
+    int m_id;
+    std::string message;
 };
 
 #endif //EXCEPTION_H

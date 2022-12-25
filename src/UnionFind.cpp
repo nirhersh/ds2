@@ -8,11 +8,15 @@ UnionFind::UnionFind(AVLRankTree<Team, int>* teamsTree){
     m_teams = teamsTree;
 }
 
+UnionFind::~UnionFind(){
+    delete m_players;
+}
+
 Team* UnionFind::find(int playerId) const
 {
     Node* currentPlayer = m_players->find(playerId);
     Node* tempToStart = currentPlayer;
-    permutation_t permAccumulator = currentPlayer->m_partialSpirit * currentPlayer->m_partialSpirit.inv(); // this is the identity element
+    permutation_t permAccumulator = permutation_t::neutral(); // this is the identity element
     int gamesCounter = 0;
     while(currentPlayer->m_parent)
     {
@@ -53,15 +57,16 @@ void UnionFind::union_teams(Team* mainTeam, Team* secondTeam)
 
 void UnionFind::add_player(Player* player, int teamId){
     Team* team = m_teams->search(teamId);
+    Node* playerNode = nullptr;
     if(team->get_team_root() == nullptr){
-        Node* playerNode = new Node(player, player->get_spirit(), team, nullptr, 0);
+        playerNode = new Node(player, player->get_spirit(), team, nullptr, 0);
         team->set_team_root(playerNode);
     }else{
         Node* teamRoot = team->get_team_root();
         permutation_t partialSpirit = (teamRoot->m_partialSpirit.inv()) * teamRoot->m_team->get_spirit_strength();
-        Node* playerNode = new Node(player, partialSpirit, team, teamRoot, -(teamRoot->m_gamesPlayed));
-        m_players->add(player->get_player_id(), playerNode);
+        playerNode = new Node(player, partialSpirit, team, teamRoot, -(teamRoot->m_gamesPlayed));
     }
+    m_players->add(player->get_player_id(), playerNode);
 }
 
 permutation_t UnionFind::get_partial_spirit(Player* player){
@@ -118,6 +123,7 @@ UnionFind::HashTable::~HashTable(){
     for(int i=0; i<m_arraySize; i++){
         if(m_nodesArray[i] != nullptr){
             delete m_nodesArray[i]->m_player;
+            delete m_nodesArray[i];
         }
     }
     delete[] m_nodesArray;
@@ -130,14 +136,14 @@ UnionFind::Node* UnionFind::HashTable::find(int playerId) const
     for (int i = 0; i < m_arraySize; i++)
     {
         if(m_nodesArray[(funcH + i * funcR) % m_arraySize] == nullptr){
-            throw IdDoesntExists();
+            throw IdDoesntExists(playerId);
             return nullptr;
         }
         if((m_nodesArray[(funcH + i * funcR) % m_arraySize]->m_player->get_player_id() == playerId)){
             return m_nodesArray[(funcH + i * funcR) % m_arraySize];
         }
     }
-    throw IdDoesntExists();
+    throw IdDoesntExists(playerId);
     return nullptr;
 }
 

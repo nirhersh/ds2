@@ -3,7 +3,6 @@
 
 #include "Player.h"
 #include "wet2util.h"
-
 #include <math.h>
 #include "assert.h"
 #include <iostream>
@@ -80,7 +79,7 @@ public:
 
     UnionFind(AVLRankTree<Team, int>* teamsTree);
 
-    ~UnionFind() = default;
+    ~UnionFind();
 
     UnionFind(const UnionFind& other) = delete;
 
@@ -100,7 +99,5 @@ private:
     HashTable* m_players;
     AVLRankTree<Team, int>* m_teams;
 };
-
-
 #include "Team.h"
 #endif //UNION_FIND_H
