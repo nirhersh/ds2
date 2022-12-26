@@ -132,37 +132,80 @@ output_t<int> world_cup_t::num_played_games_for_player(int playerId)
 	if(playerId <= 0){
 		return StatusType::INVALID_INPUT;
 	}
-	return 22;
+	try{
+		return(m_playersTeamsUF->get_games_played(playerId));
+	} catch(IdDoesntExists& e){
+		return StatusType::FAILURE;
+	}
 }
 
 StatusType world_cup_t::add_player_cards(int playerId, int cards)
 {
-	// TODO: Your code goes here
+	if(playerId <= 0){
+		return StatusType::INVALID_INPUT;
+	}
+	Player* playerToUpdate;
+	UnionFind::HashTable* playersHash = m_playersTeamsUF->get_players_hash();
+	try{
+		playerToUpdate = playersHash->find(playerId)->get_player();
+	} catch(IdDoesntExists& e){
+		return StatusType::FAILURE;
+	}
+	Team* TeamOfPlayer = m_playersTeamsUF->find(playerId);
+	if(TeamOfPlayer->get_id() == DISQUALIFIED_PLAYERS_TEAM_ID){
+		return StatusType::FAILURE;
+	}
+	playerToUpdate->add_cards(cards);
 	return StatusType::SUCCESS;
 }
 
 output_t<int> world_cup_t::get_player_cards(int playerId)
 {
-	// TODO: Your code goes here
-	return StatusType::SUCCESS;
+	if(playerId <= 0){
+		return StatusType::INVALID_INPUT;
+	}
+	Player* player;
+	UnionFind::HashTable* playersHash = m_playersTeamsUF->get_players_hash();
+	try{
+		player = playersHash->find(playerId)->get_player();
+	} catch(IdDoesntExists& e){
+		return StatusType::FAILURE;
+	}
+	return player->get_cards();
 }
 
 output_t<int> world_cup_t::get_team_points(int teamId)
 {
-	// TODO: Your code goes here
-	return 30003;
+	Team* currentTeam;
+	if(teamId <= 0){
+		return StatusType::INVALID_INPUT;
+	}
+	try{
+		currentTeam = m_UFTeams.search(teamId);
+	} catch (KeyDoesntExists& err){
+		return StatusType::FAILURE;
+	}
+	return currentTeam->get_total_points();
 }
 
 output_t<int> world_cup_t::get_ith_pointless_ability(int i)
 {
-	// TODO: Your code goes here
-	return 12345;
+	Team* ithTeam;
+	try{
+		ithTeam = m_rankedTeams.get_item_by_index(i);
+	}catch(KeyDoesntExists& err){
+		return StatusType::FAILURE;
+	}
+	return ithTeam->get_id();
 }
 
 output_t<permutation_t> world_cup_t::get_partial_spirit(int playerId)
 {
-	// TODO: Your code goes here
-	return permutation_t();
+	if(playerId <= 0){
+		return StatusType:נשרןנוש:INVALID_INPUT;
+	}
+	permutation_t permForPlayer = m_playersTeamsUF->get_partial_spirit(playerId);
+	return permForPlayer;
 }
 
 StatusType world_cup_t::buy_team(int teamId1, int teamId2)

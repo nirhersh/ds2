@@ -19,6 +19,7 @@ public:
     void add_points(int points);
     void add_ability(int ability);
     void add_games_played(int games);
+    void add_cards(int cards);
     void update_spirit_strength(const permutation_t& newPerm);
     void has_goalkeeper();
     void set_team_root(UnionFind::Node* root);

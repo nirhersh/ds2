@@ -91,9 +91,11 @@ public:
 
     void add_player(Player* player, int teamId);
 
-    permutation_t get_partial_spirit(Player* player);
+    permutation_t get_partial_spirit(int playerId);
 
-    int get_games_played(Player* player);
+    int get_games_played(int PlayerId);
+
+    HashTable* get_players_hash();
     
 private:
     HashTable* m_players;

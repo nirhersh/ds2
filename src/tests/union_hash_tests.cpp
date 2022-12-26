@@ -18,6 +18,7 @@ bool hash_rehash_test();
 bool hash_add_find_test();
 bool rankTree_test();
 bool union_find_find_test();
+bool union_find_union_test();
 
 
 
@@ -220,5 +221,120 @@ bool union_find_find_test(){
     delete team2;
     delete team3;
     return false;
+}
+
+bool union_find_union_test(){
+    AVLRankTree<Team, int> teams;
+    UnionFind* uf = new UnionFind(&teams);
+    //check union of empty teams
+    Team* team1 = new Team(1);
+    Team* team2 = new Team(2);
+    teams.push(team1, 1);
+    teams.push(team2, 2);
+    uf->union_teams(team1, team2);
+    teams.remove(2);
+
+    //check union of  empty team to not empty
+    Player* player1 = new Player(1, 1, permutation_t::neutral());
+    team1->add_player(player1);
+    uf->add_player(player1, 1);
+    teams.push(team2, 2);
+    uf->union_teams(team1, team2);
+    teams.remove(2);
+    try{
+        if(uf->find(1)->get_id() != 1){
+            return false;
+        }
+    }catch(IdDoesntExists& e){
+        std::cout << e.what() << std::endl;
+        return false;
+    }
+
+    //check union of not empty team to empty
+    Team* team3 = new Team(3);
+    teams.push(team3, 3);
+    uf->union_teams(team3, team1);
+    teams.remove(1);
+    try{
+        if(uf->find(1)->get_id() != 3){
+            return false;
+        }
+    }catch(IdDoesntExists& e){
+        std::cout << e.what() << std::endl;
+        return false;
+    }
+
+    //check union of two full teams
+    Player* player2 = new Player(2, 1, permutation_t::neutral());
+    team1->add_player(player2);
+    teams.push(team1, 1);
+    uf->add_player(player2, 1);
+    uf->union_teams(team1, team3);
+    teams.remove(3);
+    try{
+        if(uf->find(1)->get_id() != 1 || uf->find(2)->get_id() != 1){
+            return false;
+        }
+    }catch(IdDoesntExists& e){
+        std::cout << e.what() << std::endl;
+        return false;
+    }
+
+    int testLength = 10000;
+    int* array = new int[testLength];
+    for (int i = 0; i < testLength; i++)
+    {
+        array[i] = i;
+    }
+    std::random_shuffle(array, array + testLength - 1);
+    Player** players = new Player*[testLength];
+    for(int i=0; i<testLength; i++){
+        players[i] = new Player(array[i], 1, permutation_t::neutral());
+    }
+    for(int i=0; i<testLength; i++){
+        uf->add_player(players[i], 1);
+    }
+    teams.remove(1);
+    delete team1;
+    delete team2;
+    delete team3;
+
+    Team* team4 = new Team(4);
+    Team* team5 = new Team(5);
+    teams.push(team4, 4);
+    teams.push(team5, 5);
+    int seed = 1023456;
+    srand(seed);
+    int team1Size = rand() % testLength;
+    int team2Size = testLength - team1Size;
+    for(int i=0; i<team1Size; i++){
+        uf->add_player(players[i], 4);
+        team4->add_player(players[i]);
+    }
+    for(int i=team1Size; i<testLength; i++){
+        uf->add_player(players[i], 5);
+        team5->add_player(players[i]);
+    }
+
+    uf->union_teams(team4, team5);
+    teams.remove(5);
+    if(team4->get_num_of_players() != testLength){
+        return false;
+    }
+    for(int i=0; i<testLength; i++){
+        try{
+            if(uf->find(i)->get_id() != 4){
+                return false;
+            }
+        }catch(IdDoesntExists& e){
+            std::cout << e.what() << std::endl;
+            return false;
+        }
+    }
+    delete [] array;
+    delete [] players;
+    delete team4;
+    delete team5;
+    delete uf;
 }
 

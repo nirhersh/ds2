@@ -69,9 +69,9 @@ void UnionFind::add_player(Player* player, int teamId){
     m_players->add(player->get_player_id(), playerNode);
 }
 
-permutation_t UnionFind::get_partial_spirit(Player* player){
-    find(player->get_player_id());
-    Node* current = m_players->find(player->get_player_id());
+permutation_t UnionFind::get_partial_spirit(int playerId){
+    find(playerId);
+    Node* current = m_players->find(playerId);
     permutation_t partialSpirit = current->m_partialSpirit * (current->m_partialSpirit.inv());
     while(current){
         partialSpirit = current->m_partialSpirit * partialSpirit;
@@ -79,16 +79,21 @@ permutation_t UnionFind::get_partial_spirit(Player* player){
     return partialSpirit;
 }
 
-int UnionFind::get_games_played(Player* player)
+int UnionFind::get_games_played(int playerId)
 {
     int gamesCounter = 0;
-    Node* current = m_players->find(player->get_player_id());
-    find(player->get_player_id());
+    Node* current = m_players->find(playerId);
+    find(playerId); 
     while(current)
     {
         gamesCounter += current->m_gamesPlayed;
     }
     return gamesCounter;
+}
+
+UnionFind::HashTable* UnionFind::get_players_hash()
+{
+    return m_players;
 }
 
 /*.......................NODE IMPLEMENTATION............................*/

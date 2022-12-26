@@ -80,3 +80,8 @@ void Team::unite_team(Team* newTeam){
     m_totalPoints += newTeam->get_total_points();
 }
 
+void Team::add_cards(int cards)
+{
+    m_
+}
+
