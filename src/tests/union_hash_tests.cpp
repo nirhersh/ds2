@@ -28,6 +28,7 @@ int main()
     run_test(hash_rehash_test, "rehash test");
     run_test(rankTree_test, "rankTree test");
     run_test(union_find_find_test, "Union Find find() test");
+    run_test(union_find_union_test, "Union Find union() test");
 }
 
 
@@ -63,14 +64,11 @@ bool hash_add_find_test(){
 
 bool hash_rehash_test(){
     UnionFind::HashTable hash1;
-    int hashSize = 500;
+    int hashSize = 10000;
     UnionFind::Node** nodes = new UnionFind::Node*[hashSize];
     for(int i=0; i<hashSize; i++){
         nodes[i] = new UnionFind::Node(new Player(i, i, permutation_t()), permutation_t(), nullptr, nullptr);
         hash1.add(i, nodes[i]);
-    }
-    if(hash1.get_array_size() != (pow(2, 10) - 1)){
-        return false;
     }
 
     for(int i=0; i<hashSize; i++){
@@ -243,6 +241,7 @@ bool union_find_union_test(){
     teams.remove(2);
     try{
         if(uf->find(1)->get_id() != 1){
+            std::cout << "two empty teams fail" << std::endl;
             return false;
         }
     }catch(IdDoesntExists& e){
@@ -257,6 +256,7 @@ bool union_find_union_test(){
     teams.remove(1);
     try{
         if(uf->find(1)->get_id() != 3){
+            std::cout << "one full teams fail" << std::endl;
             return false;
         }
     }catch(IdDoesntExists& e){
@@ -266,19 +266,27 @@ bool union_find_union_test(){
 
     //check union of two full teams
     Player* player2 = new Player(2, 1, permutation_t::neutral());
-    team1->add_player(player2);
-    teams.push(team1, 1);
-    uf->add_player(player2, 1);
-    uf->union_teams(team1, team3);
+    Team* team6 = new Team(6);
+    team6->add_player(player2);
+    teams.push(team6, 6);
+    uf->add_player(player2, 6);
+    uf->union_teams(team6, team3);
     teams.remove(3);
     try{
-        if(uf->find(1)->get_id() != 1 || uf->find(2)->get_id() != 1){
+        if(uf->find(1)->get_id() != 6 || uf->find(2)->get_id() != 6){
+            std::cout << "two full teams fail" << std::endl;
             return false;
         }
     }catch(IdDoesntExists& e){
         std::cout << e.what() << std::endl;
         return false;
     }
+    
+    teams.remove(6);
+    delete team1;
+    delete team2;
+    delete team3;
+    delete team6;
 
     int testLength = 10000;
     int* array = new int[testLength];
@@ -288,16 +296,6 @@ bool union_find_union_test(){
     }
     std::random_shuffle(array, array + testLength - 1);
     Player** players = new Player*[testLength];
-    for(int i=0; i<testLength; i++){
-        players[i] = new Player(array[i], 1, permutation_t::neutral());
-    }
-    for(int i=0; i<testLength; i++){
-        uf->add_player(players[i], 1);
-    }
-    teams.remove(1);
-    delete team1;
-    delete team2;
-    delete team3;
 
     Team* team4 = new Team(4);
     Team* team5 = new Team(5);
@@ -306,24 +304,27 @@ bool union_find_union_test(){
     int seed = 1023456;
     srand(seed);
     int team1Size = rand() % testLength;
-    int team2Size = testLength - team1Size;
+    std::cout << "team1 size "<< team1Size << std::endl;
     for(int i=0; i<team1Size; i++){
+        players[i] = new Player(array[i], 4, permutation_t::neutral());
         uf->add_player(players[i], 4);
         team4->add_player(players[i]);
     }
     for(int i=team1Size; i<testLength; i++){
+        players[i] = new Player(array[i], 5, permutation_t::neutral());
         uf->add_player(players[i], 5);
         team5->add_player(players[i]);
     }
-
     uf->union_teams(team4, team5);
     teams.remove(5);
     if(team4->get_num_of_players() != testLength){
+        std::cout << "num of players fail" << std::endl;
         return false;
     }
     for(int i=0; i<testLength; i++){
         try{
-            if(uf->find(i)->get_id() != 4){
+            if(uf->find(i)->get_id() != 4){ 
+                std::cout << "union of two big teams fail" << std::endl;
                 return false;
             }
         }catch(IdDoesntExists& e){
@@ -336,5 +337,6 @@ bool union_find_union_test(){
     delete team4;
     delete team5;
     delete uf;
+    return true;
 }
 

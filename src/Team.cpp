@@ -1,7 +1,7 @@
 #include "Team.h"
 
 Team::Team(int teamId) : m_teamId(teamId), m_totalPoints(0), m_totalPlayersAbility(0),
-                         m_gamesPlayed(0), m_goalkeeper(false){
+                         m_gamesPlayed(0), m_numOfPlayers(0), m_goalkeeper(false){
     m_spiritStrength = permutation_t::neutral();
     m_teamRoot = nullptr;
 }
@@ -58,8 +58,8 @@ void Team::update_spirit_strength(const permutation_t& newPerm){
     }
 }
 
-void Team::has_goalkeeper(){
-    m_goalkeeper = true;
+bool Team::has_goalkeeper(){
+    return m_goalkeeper;
 }
 
 void Team::set_team_root(UnionFind::Node* root){
@@ -76,12 +76,14 @@ void Team::add_player(Player* newPlayer){
 }
 
 void Team::unite_team(Team* newTeam){
-    m_numOfPlayers += newTeam->get_num_of_players();
-    m_totalPoints += newTeam->get_total_points();
+    if(newTeam){
+        m_numOfPlayers += newTeam->get_num_of_players();
+        m_totalPoints += newTeam->get_total_points();
+        if(newTeam->has_goalkeeper()){
+            m_goalkeeper = true;
+        }
+    }
 }
 
-void Team::add_cards(int cards)
-{
-    m_
-}
+
 

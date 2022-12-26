@@ -293,6 +293,7 @@ void AVLRankTree<T, K>::push(T* item, const K& key){
         Node* newNode(new AVLRankTree<T, K>::Node(item, key));
         root = newNode;
         found = true;
+        root->m_rank = 1;
     }
     while (!found)
     {
@@ -338,7 +339,6 @@ void AVLRankTree<T, K>::balance_tree(Node* newNode)
 {
     assert(newNode != nullptr);
     Node* tempNode = newNode;
-    assert(tempNode->m_parent != nullptr);
     while(tempNode != root && tempNode->m_parent != nullptr)
     {
         assert(tempNode->m_parent);
@@ -569,12 +569,10 @@ typename AVLRankTree<T, K>::Node* AVLRankTree<T, K>::remove_node(Node* nodeToRem
     }
     Node* nodeToReturn;
     if (nodeToRemove->m_right == nullptr && nodeToRemove->m_left == nullptr)
-
     {
-        
         if(nodeToRemove != root && nodeToRemove->m_parent){
             if(!isRight){
-                nodeToRemove->m_parent->m_left = NULL; 
+                nodeToRemove->m_parent->m_left = nullptr; 
             }
             else{
                 nodeToRemove->m_parent->m_right = nullptr;

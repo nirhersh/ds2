@@ -202,7 +202,7 @@ output_t<int> world_cup_t::get_ith_pointless_ability(int i)
 output_t<permutation_t> world_cup_t::get_partial_spirit(int playerId)
 {
 	if(playerId <= 0){
-		return StatusType:נשרןנוש:INVALID_INPUT;
+		return StatusType::INVALID_INPUT;
 	}
 	permutation_t permForPlayer = m_playersTeamsUF->get_partial_spirit(playerId);
 	return permForPlayer;

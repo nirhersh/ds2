@@ -21,7 +21,7 @@ public:
     void add_games_played(int games);
     void add_cards(int cards);
     void update_spirit_strength(const permutation_t& newPerm);
-    void has_goalkeeper();
+    bool has_goalkeeper();
     void set_team_root(UnionFind::Node* root);
     void add_player(Player* newPlayer);
     void unite_team(Team* newTeam);

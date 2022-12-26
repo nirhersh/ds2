@@ -41,16 +41,29 @@ void UnionFind::union_teams(Team* mainTeam, Team* secondTeam)
 {
     Node* root1 = mainTeam->get_team_root();
     Node* root2 = secondTeam->get_team_root();
-    int team1Size = mainTeam->get_num_of_players();
-    int team2Size = secondTeam->get_num_of_players();
-    if(team1Size >= team2Size){
-        root2->m_partialSpirit = (root1->m_partialSpirit.inv()) * mainTeam->get_spirit_strength() * root2->m_partialSpirit;
-        root2->m_gamesPlayed -= root1->m_gamesPlayed;
-    }else{
-        root2->m_partialSpirit = mainTeam->get_spirit_strength() * root2->m_partialSpirit;
-        root1->m_partialSpirit = root2->m_partialSpirit.inv() * root1->m_partialSpirit;
-        root1->m_gamesPlayed -= root2->m_gamesPlayed;
-        mainTeam->set_team_root(root2);
+    int team1Size = mainTeam->get_num_of_players(); 
+    int team2Size = secondTeam->get_num_of_players(); 
+    if(root1 != nullptr || root2 != nullptr){
+        if(team1Size >= team2Size){
+            if(root2 != nullptr){
+                root2->m_partialSpirit = (root1->m_partialSpirit.inv()) * mainTeam->get_spirit_strength() * root2->m_partialSpirit;
+                root2->m_gamesPlayed -= root1->m_gamesPlayed;
+                root2->m_team = nullptr;
+                root2->m_parent = root1;
+                assert(root1->m_parent == nullptr);
+            }
+        }else{
+            root2->m_partialSpirit = mainTeam->get_spirit_strength() * root2->m_partialSpirit;
+            if(root1 != nullptr){
+                root1->m_partialSpirit = root2->m_partialSpirit.inv() * root1->m_partialSpirit;
+                root1->m_gamesPlayed -= root2->m_gamesPlayed;   
+                root1->m_parent = root2;
+                root1->m_team = nullptr;
+                assert(root2->m_parent == nullptr);
+            }
+            mainTeam->set_team_root(root2);
+            root2->m_team =mainTeam;
+        }
     }
     mainTeam->unite_team(secondTeam);
 }
@@ -75,6 +88,7 @@ permutation_t UnionFind::get_partial_spirit(int playerId){
     permutation_t partialSpirit = current->m_partialSpirit * (current->m_partialSpirit.inv());
     while(current){
         partialSpirit = current->m_partialSpirit * partialSpirit;
+        current = current->m_parent;
     }
     return partialSpirit;
 }
@@ -87,6 +101,7 @@ int UnionFind::get_games_played(int playerId)
     while(current)
     {
         gamesCounter += current->m_gamesPlayed;
+        current = current->m_parent;
     }
     return gamesCounter;
 }
@@ -186,14 +201,15 @@ void UnionFind::HashTable::rehash(){
         m_nodesArray[i] = nullptr;
     }
     m_currentSize = 0;
-    for(int i=0; i<m_arraySize; i++){
+    int oldSize = m_arraySize;
+    m_arraySize = newSize;
+    for(int i=0; i<oldSize; i++){
         if(tempArray[i] != nullptr){ 
             int playerId = tempArray[i]->m_player->get_player_id();
             add(playerId, tempArray[i]);
         }
     }
     delete[] tempArray;
-    m_arraySize = newSize;
     m_nodesArray = newNodesArray;
 }
 
