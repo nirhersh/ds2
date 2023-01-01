@@ -95,6 +95,9 @@ output_t<int> world_cup_t::play_match(int teamId1, int teamId2)
 	try{
 		Team* team1 = m_UFTeams.search(teamId1);
 		Team* team2 = m_UFTeams.search(teamId2);
+		if(!(team1->has_goalkeeper()) || !(team2->has_goalkeeper())){
+			return StatusType::FAILURE;
+		}
 		int team1Ability = team1->get_total_points() + team1->get_team_ability();
 		int team2Ability = team2->get_total_points() + team2->get_team_ability();
 		if(team1Ability > team2Ability){
@@ -201,16 +204,34 @@ output_t<int> world_cup_t::get_ith_pointless_ability(int i)
 
 output_t<permutation_t> world_cup_t::get_partial_spirit(int playerId)
 {
+	permutation_t permForPlayer;
 	if(playerId <= 0){
 		return StatusType::INVALID_INPUT;
 	}
-	permutation_t permForPlayer = m_playersTeamsUF->get_partial_spirit(playerId);
+	try{
+		permForPlayer = m_playersTeamsUF->get_partial_spirit(playerId);
+	} catch (IdDoesntExists& err){
+		return StatusType::FAILURE;
+	}
 	return permForPlayer;
 }
 
 StatusType world_cup_t::buy_team(int teamId1, int teamId2)
 {
-	// TODO: Your code goes here
+	if(teamId2 <=0 || teamId1 <= 0 || teamId1 == teamId2){
+		return StatusType::INVALID_INPUT;
+	}
+	Team* buyer;
+	Team* absorbed;
+	try{
+		buyer = m_UFTeams.search(teamId1);
+		absorbed = m_UFTeams.search(teamId2);
+	} catch(KeyDoesntExists& err){
+		return StatusType::FAILURE;
+	}
+	m_playersTeamsUF->union_teams(buyer, absorbed);
+	m_UFTeams.remove(teamId2);
+	delete absorbed;
 	return StatusType::SUCCESS;
 }
 

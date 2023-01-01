@@ -2,7 +2,7 @@ GPP=g++
 PROJ_FILES_PATH=.
 TESTS_DIR=./tests
 O_FILES_DIR=$(TESTS_DIR)/OFiles
-EXEC=UnionFindTester
+EXEC=worldCupTester
 #TESTS_INCLUDED_FILE=worldcup23a1.h
 OBJS=$(O_FILES_DIR)/UnitTests.o $(O_FILES_DIR)/Team.o $(O_FILES_DIR)/Player.o $(O_FILES_DIR)/UnionFind.o  #$(O_FILES_DIR)/worldcup23a1.o # UPDATE HERE ALL THE O FILES YOU CREATED BELOW
 DEBUG_FLAG= -g # can add -g
@@ -11,9 +11,9 @@ COMP_FLAG=--std=c++11 -Wall -Werror -pedantic-errors $(DEBUG_FLAG)
 $(EXEC) : $(OBJS)
 	$(GPP) $(COMP_FLAG) $(OBJS) -o $@
 
-$(O_FILES_DIR)/UnitTests.o : $(TESTS_DIR)/union_hash_tests.cpp
+$(O_FILES_DIR)/UnitTests.o : $(TESTS_DIR)/worldCup_tests.cpp
 	@mkdir -p $(O_FILES_DIR)
-	$(GPP) -c $(COMP_FLAG) $(TESTS_DIR)/union_hash_tests.cpp -o $@
+	$(GPP) -c $(COMP_FLAG) $(TESTS_DIR)/worldCup_tests.cpp -o $@
 
  # UPDATE FROM HERE
 
