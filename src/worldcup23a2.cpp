@@ -1,5 +1,12 @@
 #include "worldcup23a2.h"
 
+const int world_cup_t::DISQUALIFIED_PLAYERS_TEAM_ID = -1;
+const int world_cup_t::DRAW = 0;
+const int world_cup_t::TEAM1_WON_WITH_ABILITY = 1;
+const int world_cup_t::TEAM1_WON_WITH_TEAM_STRENGTH = 2;
+const int world_cup_t::TEAM2_WON_WITH_ABILITY = 3;
+const int world_cup_t::TEAM2_WON_WITH_TEAM_STRENGTH = 4;
+
 world_cup_t::world_cup_t()
 {
 	Team* disQualifiedPlayers = new Team(DISQUALIFIED_PLAYERS_TEAM_ID);
@@ -17,7 +24,9 @@ world_cup_t::~world_cup_t()
 	}
 	delete[] teams;
 	// delete team of disqualified players
-	m_UFTeams.remove(DISQUALIFIED_PLAYERS_TEAM_ID);
+	Team* disqualified = m_UFTeams.search(DISQUALIFIED_PLAYERS_TEAM_ID);
+	delete disqualified;
+	delete m_playersTeamsUF;
 }
 
 StatusType world_cup_t::add_team(int teamId)
@@ -42,7 +51,7 @@ StatusType world_cup_t::add_team(int teamId)
 StatusType world_cup_t::remove_team(int teamId)
 {
 	if(teamId <= 0){
-		return StatusType::FAILURE;
+		return StatusType::INVALID_INPUT;
 	}
 	try{
 		Team* teamToRemove = m_UFTeams.search(teamId);
@@ -56,7 +65,7 @@ StatusType world_cup_t::remove_team(int teamId)
 	}catch(KeyDoesntExists& e){
 		return StatusType::FAILURE;
 	}
-	return StatusType::FAILURE;
+	return StatusType::SUCCESS;
 }
 
 StatusType world_cup_t::add_player(int playerId, int teamId,
@@ -72,13 +81,11 @@ StatusType world_cup_t::add_player(int playerId, int teamId,
 		m_playersTeamsUF->add_player(newPlayer, teamId);
 		Team* playersTeam = m_UFTeams.search(teamId);
 		m_rankedTeams.remove(TeamKey(teamId, playersTeam->get_team_ability()));
-		playersTeam->add_ability(ability);
-		playersTeam->update_spirit_strength(spirit);
+		playersTeam->add_player(newPlayer);
 		m_rankedTeams.push(playersTeam, TeamKey(teamId, playersTeam->get_team_ability()));
 	}catch(std::bad_alloc& e){
 		return StatusType::ALLOCATION_ERROR;
 	}catch(IdDoesntExists& e){
-		delete newPlayer;
 		return StatusType::FAILURE;
 	}catch(KeyDoesntExists& e){
 		delete newPlayer;
@@ -95,11 +102,13 @@ output_t<int> world_cup_t::play_match(int teamId1, int teamId2)
 	try{
 		Team* team1 = m_UFTeams.search(teamId1);
 		Team* team2 = m_UFTeams.search(teamId2);
-		if(!(team1->has_goalkeeper()) || !(team2->has_goalkeeper())){
+		if(!team1->has_goalkeeper() || !team2->has_goalkeeper()){
 			return StatusType::FAILURE;
 		}
 		int team1Ability = team1->get_total_points() + team1->get_team_ability();
 		int team2Ability = team2->get_total_points() + team2->get_team_ability();
+		team1->add_games_played(1);
+		team2->add_games_played(1);
 		if(team1Ability > team2Ability){
 			team1->add_points(3);
 			return TEAM1_WON_WITH_ABILITY;
@@ -121,8 +130,6 @@ output_t<int> world_cup_t::play_match(int teamId1, int teamId2)
 				return DRAW;
 			}
 		}
-		team1->add_games_played(1);
-		team2->add_games_played(1);
 	}catch(std::bad_alloc& e){
 		return StatusType::ALLOCATION_ERROR;
 	}catch(KeyDoesntExists& e){
@@ -198,40 +205,40 @@ output_t<int> world_cup_t::get_ith_pointless_ability(int i)
 		ithTeam = m_rankedTeams.get_item_by_index(i);
 	}catch(KeyDoesntExists& err){
 		return StatusType::FAILURE;
+	}catch(InvalidArguments& e){
+		return StatusType::FAILURE;
 	}
 	return ithTeam->get_id();
 }
 
 output_t<permutation_t> world_cup_t::get_partial_spirit(int playerId)
 {
-	permutation_t permForPlayer;
 	if(playerId <= 0){
 		return StatusType::INVALID_INPUT;
 	}
 	try{
-		permForPlayer = m_playersTeamsUF->get_partial_spirit(playerId);
-	} catch (IdDoesntExists& err){
+		permutation_t permForPlayer = m_playersTeamsUF->get_partial_spirit(playerId);
+		return permForPlayer;
+	}catch(IdDoesntExists& e){
 		return StatusType::FAILURE;
 	}
-	return permForPlayer;
 }
 
 StatusType world_cup_t::buy_team(int teamId1, int teamId2)
 {
-	if(teamId2 <=0 || teamId1 <= 0 || teamId1 == teamId2){
+	if(teamId1 <= 0 || teamId2 <= 0 || teamId1 == teamId2){
 		return StatusType::INVALID_INPUT;
 	}
-	Team* buyer;
-	Team* absorbed;
 	try{
-		buyer = m_UFTeams.search(teamId1);
-		absorbed = m_UFTeams.search(teamId2);
-	} catch(KeyDoesntExists& err){
+		Team* team1 = m_UFTeams.search(teamId1);
+		Team* team2 = m_UFTeams.search(teamId2);
+		m_playersTeamsUF->union_teams(team1, team2);
+		m_UFTeams.remove(team2->get_id());
+		m_rankedTeams.remove(TeamKey(team2->get_id(), team2->get_team_ability()));
+		delete team2;
+	}catch(KeyDoesntExists& err){
 		return StatusType::FAILURE;
 	}
-	m_playersTeamsUF->union_teams(buyer, absorbed);
-	m_UFTeams.remove(teamId2);
-	delete absorbed;
 	return StatusType::SUCCESS;
 }
 
@@ -253,4 +260,11 @@ bool operator<(const world_cup_t::TeamKey& first, const world_cup_t::TeamKey& se
 	}else{
 		return first.m_teamId < second.m_teamId;
 	}
+}
+
+bool operator==(const world_cup_t::TeamKey& first, const world_cup_t::TeamKey& second){
+	if (first.m_teamAbility == second.m_teamAbility && first.m_teamAbility > second.m_teamAbility){
+		return true;
+	}
+	return false;
 }

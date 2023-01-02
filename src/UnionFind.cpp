@@ -42,15 +42,16 @@ void UnionFind::union_teams(Team* mainTeam, Team* secondTeam)
     Node* root1 = mainTeam->get_team_root();
     Node* root2 = secondTeam->get_team_root();
     int team1Size = mainTeam->get_num_of_players(); 
-    int team2Size = secondTeam->get_num_of_players(); 
+    int team2Size = secondTeam->get_num_of_players();
+    //std::cout << "team 1 size then 2 " << team1Size << ", " << team2Size << std::endl; 
     if(root1 != nullptr || root2 != nullptr){
         if(team1Size >= team2Size){
             if(root2 != nullptr){
                 root2->m_partialSpirit = (root1->m_partialSpirit.inv()) * mainTeam->get_spirit_strength() * root2->m_partialSpirit;
                 root2->m_gamesPlayed -= root1->m_gamesPlayed;
                 root2->m_team = nullptr;
+                assert(root2 != root1);
                 root2->m_parent = root1;
-                assert(root1->m_parent == nullptr);
             }
         }else{
             root2->m_partialSpirit = mainTeam->get_spirit_strength() * root2->m_partialSpirit;
@@ -62,7 +63,7 @@ void UnionFind::union_teams(Team* mainTeam, Team* secondTeam)
                 assert(root2->m_parent == nullptr);
             }
             mainTeam->set_team_root(root2);
-            root2->m_team =mainTeam;
+            root2->m_team = mainTeam;
         }
     }
     mainTeam->unite_team(secondTeam);
@@ -74,10 +75,12 @@ void UnionFind::add_player(Player* player, int teamId){
     if(team->get_team_root() == nullptr){
         playerNode = new Node(player, player->get_spirit(), team, nullptr, 0);
         team->set_team_root(playerNode);
+        assert(team->get_team_root()->m_parent == nullptr);
     }else{
         Node* teamRoot = team->get_team_root();
         permutation_t partialSpirit = (teamRoot->m_partialSpirit.inv()) * teamRoot->m_team->get_spirit_strength();
         playerNode = new Node(player, partialSpirit, team, teamRoot, -(teamRoot->m_gamesPlayed));
+        assert(teamRoot->m_parent == nullptr);
     }
     m_players->add(player->get_player_id(), playerNode);
 }
@@ -125,6 +128,10 @@ void UnionFind::Node::set_team(Team* team){
 
 void UnionFind::Node::update_partial_spirit(const permutation_t& newPerm){
     m_partialSpirit = newPerm * m_partialSpirit;
+}
+
+void UnionFind::Node::update_games_played(int games){
+    m_gamesPlayed += games;
 }
 
 
@@ -179,7 +186,7 @@ void UnionFind::HashTable::add(int playerId, UnionFind::Node* node){
         rehash();
     }
     int funcH = playerId % m_arraySize;
-    int funcR = 1 + playerId % (((m_arraySize + 1) / 2) - 1); //the id, mod the last array size. have to be strangers
+    int funcR = ((m_arraySize + 1) / 2) - 1; //the id, mod the last array size. have to be strangers
     for(int i=0; i < m_arraySize; i++){
         if(m_nodesArray[(funcH + i * funcR) % m_arraySize] == nullptr){
             m_nodesArray[(funcH + i * funcR) % m_arraySize] = node;
@@ -212,4 +219,6 @@ void UnionFind::HashTable::rehash(){
     delete[] tempArray;
     m_nodesArray = newNodesArray;
 }
+
+
 

@@ -36,20 +36,24 @@ private:
 		friend bool operator>(const TeamKey& first, const TeamKey& second);
 
     	friend bool operator<(const TeamKey& first, const TeamKey& second);
+
+		friend bool operator==(const TeamKey& first, const TeamKey& second);
 	};
 	UnionFind* m_playersTeamsUF;
 	AVLRankTree<Team, int> m_UFTeams;
 	AVLRankTree<Team, TeamKey> m_rankedTeams;
-	static const int DISQUALIFIED_PLAYERS_TEAM_ID = -1;
-	static const int DRAW = 0;
-	static const int TEAM1_WON_WITH_ABILITY = 1;
-	static const int TEAM1_WON_WITH_TEAM_STRENGTH = 2;
-	static const int TEAM2_WON_WITH_ABILITY = 3;
-	static const int TEAM2_WON_WITH_TEAM_STRENGTH = 4;
+	static const int DISQUALIFIED_PLAYERS_TEAM_ID;
+	static const int DRAW;
+	static const int TEAM1_WON_WITH_ABILITY;
+	static const int TEAM1_WON_WITH_TEAM_STRENGTH;
+	static const int TEAM2_WON_WITH_ABILITY;
+	static const int TEAM2_WON_WITH_TEAM_STRENGTH;
 
 	friend bool operator>(const TeamKey& first, const TeamKey& second);
 
 	friend bool operator<(const TeamKey& first, const TeamKey& second);
+
+	friend bool operator==(const TeamKey& first, const TeamKey& second);
 	
 public:
 	// <DO-NOT-MODIFY> {

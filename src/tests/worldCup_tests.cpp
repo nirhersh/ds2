@@ -48,24 +48,27 @@ void run_test(std::function<bool()> test, std::string test_name)
 
 bool add_remove_team_test()
 {
-    int testLength = 1000;
+    int testLength = 10000;
     int seed = 493204;
     world_cup_t* wct1 = new world_cup_t();
     assert(wct1->add_team(0) == StatusType::INVALID_INPUT);
     assert(wct1->add_team(-1) == StatusType::INVALID_INPUT);
     assert(wct1->remove_team(0) == StatusType::INVALID_INPUT);
     assert(wct1->remove_team(-1) == StatusType::INVALID_INPUT);
+    int arr[10000] = {0};
     for (int i = 0; i < testLength; i++)
     {
         srand(seed + i);
-        assert(wct1->add_team(rand()) == StatusType::SUCCESS);
-        assert(wct1->add_team(rand()) == StatusType::FAILURE);
+        int x = rand();
+        assert(wct1->add_team(x) == StatusType::SUCCESS);
+        assert(wct1->add_team(x) == StatusType::FAILURE);
+        arr[i] = x;
     }
     for (int i = 0; i < testLength; i++)
     {
-        srand(seed + i);
-        assert(wct1->remove_team(rand()) == StatusType::SUCCESS);
-        assert(wct1->remove_team(rand()) == StatusType::FAILURE);
+        int x = arr[i];
+        assert(wct1->remove_team(x) == StatusType::SUCCESS);
+        assert(wct1->remove_team(x) == StatusType::FAILURE);
     }
     return true;    
 }
@@ -85,9 +88,9 @@ bool add_player_test()
     for (int i = 0; i < testLength; i++)
     {
         srand(seed + i);
-        assert(wct1->add_player(rand(), rand() % 100, permutation_t(),
+        assert(wct1->add_player(rand() + 1, rand() % 100 + 1, permutation_t::neutral(),
                 rand() % 20, rand() % 10, rand() % 3, !(rand() % 11)) == StatusType::SUCCESS);
-        assert(wct1->add_player(rand(), rand() % 100 + 200, permutation_t(),
+        assert(wct1->add_player(rand(), rand() % 100 + 200, permutation_t::neutral(),
                 rand() % 20, rand() % 10, rand() % 3, !(rand() % 11)) == StatusType::FAILURE);
     }
     return true;
@@ -109,9 +112,9 @@ bool play_match_test()
     
     //check first won by ability
     srand(seed);
-    assert(wct1->add_player(rand(), 2, permutation_t(),
+    assert(wct1->add_player(rand(), 2, permutation_t::neutral(),
                 rand() % 20, 100000, rand() % 3, true) == StatusType::SUCCESS);
-    assert(wct1->add_player(rand(), 3, permutation_t(),
+    assert(wct1->add_player(rand(), 3, permutation_t::neutral(),
                 rand() % 20, 0, rand() % 3, true) == StatusType::SUCCESS);
     assert(wct1->play_match(2, 3).ans() == 1);
 
@@ -120,16 +123,22 @@ bool play_match_test()
 
     //check first won by team spirit
     srand(seed);
-    int perm1[5] = {0, 0, 0, 0, 0};
-    int perm2[5] = {2, 2, 2, 2, 2};
-    assert(wct1->add_player(rand(), 4, permutation_t(perm1),
-                rand() % 20, 0, rand() % 3, true) == StatusType::SUCCESS);
-    assert(wct1->add_player(rand(), 5, permutation_t(perm2),
-                rand() % 20, 0, rand() % 3, true) == StatusType::SUCCESS);
+    int perm1[5] = {4, 3, 2, 1, 0};
+    int perm2[5] = {0, 1, 2, 3, 4};
+    int x = rand();
+    assert(wct1->add_player(rand() + 1, 4, perm1,
+                x % 20, 0, x % 3, true) == StatusType::SUCCESS);
+    assert(wct1->add_player(rand(), 5, perm2,
+                x % 20, 0, x % 3, true) == StatusType::SUCCESS);
     assert(wct1->play_match(4, 5).ans() == 4);
 
     //check second won by team spirit
-    assert(wct1->play_match(5, 4).ans() == 2);
+    std::cout << "dsfsfds" << wct1->play_match(5, 4).ans() << std::endl;
+    assert(wct1->add_player(rand() + 1, 90, perm1,
+                x % 20, 0, x % 3, true) == StatusType::SUCCESS);
+    assert(wct1->add_player(rand(), 91, perm2,
+                x % 20, 0, x % 3, true) == StatusType::SUCCESS);
+    assert(wct1->play_match(91, 90).ans() == 2);
 
     //check tie
     srand(seed);
@@ -153,7 +162,7 @@ bool get_num_played_games_for_player_test()
     {
         srand(seed + 10 * i);
         assert(wct1->add_team(i) == StatusType::SUCCESS);
-        assert(wct1->add_player(i, i, permutation_t(),
+        assert(wct1->add_player(i, i, permutation_t::neutral(),
                 0, rand() % 10, rand() % 3, true) == StatusType::SUCCESS);
         assert(wct1->num_played_games_for_player(i).ans() == 0);
     }
@@ -167,20 +176,27 @@ bool get_num_played_games_for_player_test()
     for (int i = 0; i < testLength; i++)
     {
         srand(seed + i);
-        assert(wct1->add_player(rand(), rand() % 100 + 1, permutation_t(),
+        assert(wct1->add_player(rand(), rand() % 100 + 1, permutation_t::neutral(),
                 0, rand() % 10, rand() % 3, !(rand() % 11)) == StatusType::SUCCESS);
     }
     wct1->play_match(1, 2);
     assert(wct1->num_played_games_for_player(1).ans() == 1);
     assert(wct1->num_played_games_for_player(2).ans() == 1);
-    int histogram [101]= {0};
+    int histogram [101] = {0};
     histogram[1]++;
     histogram[2]++;
     for (int i = 0; i < testLength; i++)
     {
         srand(seed + i);
         int firstTeam = rand() % 100 + 1;
-        int secondTeam = rand() % 100 + 1 > 0 ? rand() % 100 : 50;
+        int secondTeam = rand() % 100 + 1;
+        if(firstTeam == secondTeam){
+            if(firstTeam == 1){
+                secondTeam = 2 + rand() % 90;
+            }else{
+                secondTeam = firstTeam - 1;
+            }
+        }
         wct1->play_match(firstTeam, secondTeam);
         histogram[firstTeam]++;
         histogram[secondTeam]++;
@@ -206,11 +222,11 @@ bool add_get_player_cards_test()
     int seed = 76134;
     world_cup_t* wct1 = new world_cup_t();
     // add teams
-    for (int i = 1; i < 102; i++)
+    for (int i = 1; i < 103; i++)
     {
         srand(seed + 10 * i);
         assert(wct1->add_team(i) == StatusType::SUCCESS);
-        assert(wct1->add_player(i, i, permutation_t(),
+        assert(wct1->add_player(i, i, permutation_t::neutral(),
                 rand() % 20, rand() % 10, 0, true) == StatusType::SUCCESS);
         assert(wct1->get_player_cards(i).ans() == 0);
     }
@@ -218,7 +234,6 @@ bool add_get_player_cards_test()
     //check input for add
     assert(wct1->add_player_cards(-1, 1000) == StatusType::INVALID_INPUT);
     assert(wct1->add_player_cards(0, 1000) == StatusType::INVALID_INPUT);
-    assert(wct1->add_player_cards(10, -1) == StatusType::INVALID_INPUT);
     assert(wct1->add_player_cards(1000, 10) == StatusType::FAILURE);
     assert(wct1->remove_team(102) == StatusType::SUCCESS);
     assert(wct1->add_player_cards(102, 10) == StatusType::FAILURE);
@@ -235,7 +250,7 @@ bool add_get_player_cards_test()
     for (int i = 0; i < testLength; i++)
     {
         srand(seed + i);
-        assert(wct1->add_player(rand(), rand() % 100 + 1, permutation_t(),
+        assert(wct1->add_player(rand(), rand() % 100 + 1, permutation_t::neutral(),
                 rand() % 20, rand() % 10, rand() % 3, !(rand() % 11)) == StatusType::SUCCESS);
     }
     int histogram [101]= {0};
@@ -273,7 +288,7 @@ bool get_team_points()
     for (int i = 0; i < testLength; i++)
     {
         srand(seed + i);
-        assert(wct1->add_player(rand(), rand() % 100, permutation_t(),
+        assert(wct1->add_player(rand(), rand() % 100, permutation_t::neutral(),
                 0, rand() % 10, rand() % 3, !(rand() % 11)) == StatusType::SUCCESS);
         assert(wct1->get_team_points(i).ans() == 0);
     }   

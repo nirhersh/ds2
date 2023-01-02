@@ -29,6 +29,8 @@ public:
 
         void update_partial_spirit(const permutation_t& newPerm);
 
+        void update_games_played(int games);
+
         Player* get_player(){
             return m_player;
         }

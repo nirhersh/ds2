@@ -49,6 +49,7 @@ void Team::add_ability(int ability){
 
 void Team::add_games_played(int games){
     m_gamesPlayed += games;
+    m_teamRoot->update_games_played(games);
 }
 void Team::update_spirit_strength(const permutation_t& newPerm){
     if(!m_spiritStrength.isvalid()){
@@ -79,6 +80,8 @@ void Team::unite_team(Team* newTeam){
     if(newTeam){
         m_numOfPlayers += newTeam->get_num_of_players();
         m_totalPoints += newTeam->get_total_points();
+        m_totalPlayersAbility += newTeam->get_team_ability();
+        m_spiritStrength = m_spiritStrength * newTeam->m_spiritStrength;
         if(newTeam->has_goalkeeper()){
             m_goalkeeper = true;
         }

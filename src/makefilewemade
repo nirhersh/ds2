@@ -4,7 +4,7 @@ TESTS_DIR=./tests
 O_FILES_DIR=$(TESTS_DIR)/OFiles
 EXEC=worldCupTester
 #TESTS_INCLUDED_FILE=worldcup23a1.h
-OBJS=$(O_FILES_DIR)/UnitTests.o $(O_FILES_DIR)/Team.o $(O_FILES_DIR)/Player.o $(O_FILES_DIR)/UnionFind.o  #$(O_FILES_DIR)/worldcup23a1.o # UPDATE HERE ALL THE O FILES YOU CREATED BELOW
+OBJS=$(O_FILES_DIR)/UnitTests.o $(O_FILES_DIR)/Team.o $(O_FILES_DIR)/Player.o $(O_FILES_DIR)/UnionFind.o  $(O_FILES_DIR)/worldcup23a2.o # UPDATE HERE ALL THE O FILES YOU CREATED BELOW
 DEBUG_FLAG= -g # can add -g
 COMP_FLAG=--std=c++11 -Wall -Werror -pedantic-errors $(DEBUG_FLAG)
 
@@ -32,11 +32,12 @@ $(O_FILES_DIR)/Player.o : Player.cpp Player.h wet2util.h
 $(O_FILES_DIR)/UnionFind.o : UnionFind.cpp Exception.h wet2util.h Team.h Player.h
 	@mkdir -p $(O_FILES_DIR)
 	$(GPP) -c $(COMP_FLAG) UnionFind.cpp -o $@
-# $(O_FILES_DIR)/worldcup23a1.o : worldcup23a1.cpp worldcup23a1.h wet1util.h AVLRankTree.h Team.h Player.h
-# 	@mkdir -p $(O_FILES_DIR)
-# 	$(GPP) -c $(COMP_FLAG) worldcup23a1.cpp -o $@
+
+$(O_FILES_DIR)/worldcup23a2.o : worldcup23a2.cpp worldcup23a2.h wet2util.h AVLRankTree.h Team.h Player.h
+	@mkdir -p $(O_FILES_DIR)
+	$(GPP) -c $(COMP_FLAG) worldcup23a2.cpp -o $@
 	
- # UNTIL HERE
+ #UNTIL HERE
 	
 
 .PHONY: clean
