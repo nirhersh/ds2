@@ -75,6 +75,9 @@ StatusType world_cup_t::add_player(int playerId, int teamId,
 	if(playerId <= 0 || teamId <= 0 || !spirit.isvalid() || gamesPlayed < 0 || cards < 0){
 		return StatusType::INVALID_INPUT;
 	}
+	if(m_playersTeamsUF->exists(playerId)){
+		return StatusType::FAILURE;
+	}
 	Player* newPlayer = nullptr;
 	try{
 		newPlayer = new Player(playerId, teamId, spirit, gamesPlayed, ability, cards, goalKeeper);
@@ -151,7 +154,7 @@ output_t<int> world_cup_t::num_played_games_for_player(int playerId)
 
 StatusType world_cup_t::add_player_cards(int playerId, int cards)
 {
-	if(playerId <= 0){
+	if(playerId <= 0 || cards < 0){
 		return StatusType::INVALID_INPUT;
 	}
 	Player* playerToUpdate;
@@ -216,6 +219,9 @@ output_t<permutation_t> world_cup_t::get_partial_spirit(int playerId)
 	if(playerId <= 0){
 		return StatusType::INVALID_INPUT;
 	}
+	if(m_playersTeamsUF->exists(playerId) && m_playersTeamsUF->find(playerId)->get_id() == -1){
+		return StatusType::FAILURE;
+	}
 	try{
 		permutation_t permForPlayer = m_playersTeamsUF->get_partial_spirit(playerId);
 		return permForPlayer;
@@ -263,7 +269,7 @@ bool operator<(const world_cup_t::TeamKey& first, const world_cup_t::TeamKey& se
 }
 
 bool operator==(const world_cup_t::TeamKey& first, const world_cup_t::TeamKey& second){
-	if (first.m_teamAbility == second.m_teamAbility && first.m_teamAbility > second.m_teamAbility){
+	if (first.m_teamId == second.m_teamId && first.m_teamAbility == second.m_teamAbility){
 		return true;
 	}
 	return false;

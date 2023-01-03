@@ -98,6 +98,8 @@ public:
     int get_games_played(int PlayerId);
 
     HashTable* get_players_hash();
+
+    bool exists(int PlayerId);
     
 private:
     HashTable* m_players;

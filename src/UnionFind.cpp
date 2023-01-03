@@ -43,7 +43,6 @@ void UnionFind::union_teams(Team* mainTeam, Team* secondTeam)
     Node* root2 = secondTeam->get_team_root();
     int team1Size = mainTeam->get_num_of_players(); 
     int team2Size = secondTeam->get_num_of_players();
-    //std::cout << "team 1 size then 2 " << team1Size << ", " << team2Size << std::endl; 
     if(root1 != nullptr || root2 != nullptr){
         if(team1Size >= team2Size){
             if(root2 != nullptr){
@@ -78,8 +77,11 @@ void UnionFind::add_player(Player* player, int teamId){
         assert(team->get_team_root()->m_parent == nullptr);
     }else{
         Node* teamRoot = team->get_team_root();
-        permutation_t partialSpirit = (teamRoot->m_partialSpirit.inv()) * teamRoot->m_team->get_spirit_strength();
+        
+        permutation_t partialSpirit = (teamRoot->m_partialSpirit.inv()) * teamRoot->m_team->get_spirit_strength() * player->get_spirit();
         playerNode = new Node(player, partialSpirit, team, teamRoot, -(teamRoot->m_gamesPlayed));
+
+
         assert(teamRoot->m_parent == nullptr);
     }
     m_players->add(player->get_player_id(), playerNode);
@@ -88,12 +90,14 @@ void UnionFind::add_player(Player* player, int teamId){
 permutation_t UnionFind::get_partial_spirit(int playerId){
     find(playerId);
     Node* current = m_players->find(playerId);
-    permutation_t partialSpirit = current->m_partialSpirit * (current->m_partialSpirit.inv());
-    while(current){
-        partialSpirit = current->m_partialSpirit * partialSpirit;
-        current = current->m_parent;
+    if(current->get_player()->get_player_id() == 3){
+        assert(current->m_parent != nullptr);
     }
-    return partialSpirit;
+    if(current->m_parent)
+    {
+        return current->m_parent->m_partialSpirit * current->m_partialSpirit;
+    }
+    return current->m_partialSpirit;
 }
 
 int UnionFind::get_games_played(int playerId)
@@ -172,6 +176,16 @@ UnionFind::Node* UnionFind::HashTable::find(int playerId) const
     }
     throw IdDoesntExists(playerId);
     return nullptr;
+}
+
+bool UnionFind::exists(int PlayerId)
+{
+    try{
+        m_players->find(PlayerId);
+    }catch(IdDoesntExists& err){
+        return false;
+    }
+    return true;
 }
 
 double UnionFind::HashTable::calculate_load_factor() const{
