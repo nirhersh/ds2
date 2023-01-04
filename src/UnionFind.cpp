@@ -66,20 +66,21 @@ void UnionFind::union_teams(Team* mainTeam, Team* secondTeam)
         }
     }
     mainTeam->unite_team(secondTeam);
+    secondTeam->set_team_root(nullptr);
 }
 
 void UnionFind::add_player(Player* player, int teamId){
     Team* team = m_teams->search(teamId);
     Node* playerNode = nullptr;
     if(team->get_team_root() == nullptr){
-        playerNode = new Node(player, player->get_spirit(), team, nullptr, 0);
+        playerNode = new Node(player, player->get_spirit(), team, nullptr, player->get_games_played());
         team->set_team_root(playerNode);
         assert(team->get_team_root()->m_parent == nullptr);
     }else{
         Node* teamRoot = team->get_team_root();
         
         permutation_t partialSpirit = (teamRoot->m_partialSpirit.inv()) * teamRoot->m_team->get_spirit_strength() * player->get_spirit();
-        playerNode = new Node(player, partialSpirit, team, teamRoot, -(teamRoot->m_gamesPlayed));
+        playerNode = new Node(player, partialSpirit, team, teamRoot, player->get_games_played()-(teamRoot->m_gamesPlayed));
 
 
         assert(teamRoot->m_parent == nullptr);
@@ -90,9 +91,6 @@ void UnionFind::add_player(Player* player, int teamId){
 permutation_t UnionFind::get_partial_spirit(int playerId){
     find(playerId);
     Node* current = m_players->find(playerId);
-    if(current->get_player()->get_player_id() == 3){
-        assert(current->m_parent != nullptr);
-    }
     if(current->m_parent)
     {
         return current->m_parent->m_partialSpirit * current->m_partialSpirit;
@@ -143,18 +141,17 @@ void UnionFind::Node::update_games_played(int games){
 UnionFind::HashTable::HashTable() : m_exponent(8), m_currentSize(0) 
 {
     m_arraySize = pow(2, m_exponent) - 1;
-    m_nodesArray = new UnionFind::Node*[m_arraySize];
-    for (int i = 0; i < m_arraySize; i++)
-    {
-        m_nodesArray[i] = nullptr;
-    }
+    m_nodesArray = new List<UnionFind::Node>[m_arraySize];
 }
 
 UnionFind::HashTable::~HashTable(){
     for(int i=0; i<m_arraySize; i++){
-        if(m_nodesArray[i] != nullptr){
-            delete m_nodesArray[i]->m_player;
-            delete m_nodesArray[i];
+        List<Node>::Node* current = m_nodesArray[i].get_first();
+        while(current != nullptr){
+            List<Node>::Node* temp = current;
+            current = current->get_next();
+            delete temp->get_data()->m_player;
+            delete temp->get_data();
         }
     }
     delete[] m_nodesArray;
@@ -162,16 +159,13 @@ UnionFind::HashTable::~HashTable(){
 
 UnionFind::Node* UnionFind::HashTable::find(int playerId) const
 {
-    int funcH = playerId % m_arraySize;
-    int funcR = 1 + playerId % (((m_arraySize + 1) / 2) - 1); //the id, mod the last array size. have to be strangers
-    for (int i = 0; i < m_arraySize; i++)
-    {
-        if(m_nodesArray[(funcH + i * funcR) % m_arraySize] == nullptr){
-            throw IdDoesntExists(playerId);
-            return nullptr;
-        }
-        if((m_nodesArray[(funcH + i * funcR) % m_arraySize]->m_player->get_player_id() == playerId)){
-            return m_nodesArray[(funcH + i * funcR) % m_arraySize];
+    int listIndex= playerId % m_arraySize;
+    List<Node>::Node* current = m_nodesArray[listIndex].get_first();
+    while(current != nullptr){
+        if(current->get_data()->get_player()->get_player_id() == playerId){
+            return current->get_data();
+        }else{
+            current = current->get_next();
         }
     }
     throw IdDoesntExists(playerId);
@@ -199,39 +193,28 @@ void UnionFind::HashTable::add(int playerId, UnionFind::Node* node){
     if(calculate_load_factor() >= MAX_LOAD_FACTOR){
         rehash();
     }
-    int funcH = playerId % m_arraySize;
-    int funcR = ((m_arraySize + 1) / 2) - 1; //the id, mod the last array size. have to be strangers
-    for(int i=0; i < m_arraySize; i++){
-        if(m_nodesArray[(funcH + i * funcR) % m_arraySize] == nullptr){
-            m_nodesArray[(funcH + i * funcR) % m_arraySize] = node;
-            m_currentSize++;
-            return;
-        }   
-    }
-    assert(false);
+    int listIndex = playerId % m_arraySize;
+    m_nodesArray[listIndex].append(node);
 }
 
 void UnionFind::HashTable::rehash(){
     m_exponent++;
     int newSize = pow(2, m_exponent) - 1;
-    Node** newNodesArray = new UnionFind::Node*[newSize];
-    Node** tempArray = m_nodesArray;
+    List<UnionFind::Node>* newNodesArray = new List<UnionFind::Node>[newSize];
+    List<UnionFind::Node>* tempArray = m_nodesArray;
     m_nodesArray = newNodesArray;
-    for (int i = 0; i < newSize; i++)
-    {
-        m_nodesArray[i] = nullptr;
-    }
     m_currentSize = 0;
     int oldSize = m_arraySize;
     m_arraySize = newSize;
     for(int i=0; i<oldSize; i++){
-        if(tempArray[i] != nullptr){ 
-            int playerId = tempArray[i]->m_player->get_player_id();
-            add(playerId, tempArray[i]);
+        List<Node>::Node* current = tempArray[i].get_first();
+        if(current != nullptr){
+            int playerId = current->get_data()->get_player()->get_player_id();
+            add(playerId, current->get_data());
+            current = current->get_next();
         }
     }
     delete[] tempArray;
-    m_nodesArray = newNodesArray;
 }
 
 

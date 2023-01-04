@@ -888,7 +888,9 @@ void AVLRankTree<T, K>::update_rank(Node* leaf, bool toIncrease)
 template<class T, class K> 
 T* AVLRankTree<T, K>::get_item_by_index(int index)
 {
-    
+    if(root == nullptr){
+        throw InvalidArguments();
+    }
     Node* currentNode = root;
     index++;
     if(index > root->m_rank || index < 1){

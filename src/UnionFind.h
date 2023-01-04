@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Exception.h"
 #include "AVLRankTree.h"
+#include "List.h"
 
 class Team;
 class UnionFind{
@@ -67,7 +68,7 @@ public:
 
 
     private:
-        UnionFind::Node** m_nodesArray;
+        List<UnionFind::Node>* m_nodesArray;
         int m_exponent;
         int m_currentSize;
         int m_arraySize;

@@ -37,8 +37,8 @@ StatusType world_cup_t::add_team(int teamId)
 	Team* newTeam = nullptr;
 	try{
 		newTeam = new Team(teamId);
-		m_rankedTeams.push(newTeam, TeamKey(teamId, 0));
 		m_UFTeams.push(newTeam, teamId);
+		m_rankedTeams.push(newTeam, TeamKey(teamId, 0));
 	}catch(std::bad_alloc& e){
 		return StatusType::ALLOCATION_ERROR;
 	}catch(KeyAlreadyExists& e){
@@ -238,10 +238,13 @@ StatusType world_cup_t::buy_team(int teamId1, int teamId2)
 	try{
 		Team* team1 = m_UFTeams.search(teamId1);
 		Team* team2 = m_UFTeams.search(teamId2);
+		int team1AbilityBeforeUnion = team1->get_team_ability();
 		m_playersTeamsUF->union_teams(team1, team2);
-		m_UFTeams.remove(team2->get_id());
-		m_rankedTeams.remove(TeamKey(team2->get_id(), team2->get_team_ability()));
+		m_UFTeams.remove(teamId2);
+		m_rankedTeams.remove(TeamKey(teamId2, team2->get_team_ability()));
 		delete team2;
+		m_rankedTeams.remove(TeamKey(teamId1, team1AbilityBeforeUnion));
+		m_rankedTeams.push(team1, TeamKey(teamId1, team1->get_team_ability()));
 	}catch(KeyDoesntExists& err){
 		return StatusType::FAILURE;
 	}
@@ -269,7 +272,7 @@ bool operator<(const world_cup_t::TeamKey& first, const world_cup_t::TeamKey& se
 }
 
 bool operator==(const world_cup_t::TeamKey& first, const world_cup_t::TeamKey& second){
-	if (first.m_teamId == second.m_teamId && first.m_teamAbility == second.m_teamAbility){
+	if (first.m_teamId == second.m_teamId){
 		return true;
 	}
 	return false;
